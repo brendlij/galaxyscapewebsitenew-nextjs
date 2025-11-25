@@ -1,0 +1,26 @@
+FROM alpine:3.20
+ARG PB_VERSION=0.22.12
+ARG TARGETARCH
+
+RUN apk add --no-cache ca-certificates curl unzip tzdata wget libc6-compat
+
+WORKDIR /pb
+RUN mkdir -p /pb/pb_data /pb/pb_public
+
+RUN set -eux; \
+  case "$TARGETARCH" in \
+    amd64) PB_FILE="pocketbase_${PB_VERSION}_linux_amd64.zip" ;; \
+    arm64) PB_FILE="pocketbase_${PB_VERSION}_linux_arm64.zip" ;; \
+    *) echo "Unsupported arch: $TARGETARCH" && exit 1 ;; \
+  esac; \
+  curl -fsSL -o pb.zip "https://github.com/pocketbase/pocketbase/releases/download/v${PB_VERSION}/${PB_FILE}"; \
+  unzip pb.zip && rm pb.zip && chmod +x /pb/pocketbase
+
+EXPOSE 8090
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:8090/api/health || exit 1
+
+VOLUME ["/pb/pb_data", "/pb/pb_public"]
+
+ENTRYPOINT ["/bin/sh","-lc"]
+CMD ["/pb/pocketbase serve --http=0.0.0.0:8090 --dir /pb/pb_data --publicDir /pb/pb_public"]

@@ -3,13 +3,15 @@ version: "3.8"
 services:
   # PocketBase - Backend API & Storage
   pocketbase:
-    image: pocketbase/pocketbase:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.pocketbase
     container_name: galaxyscape-pocketbase
+    ports:
+      - "8090:8090"
     volumes:
-      - pocketbase_data:/pb_data
-      - pocketbase_hooks:/pb_hooks
-    environment:
-      - POCKETBASE_AUTO_CONFIRM_EMAIL=true
+      - pocketbase_data:/pb/pb_data
+      - pocketbase_public:/pb/pb_public
     restart: unless-stopped
     networks:
       - galaxyscape
@@ -51,7 +53,7 @@ services:
 volumes:
   pocketbase_data:
     driver: local
-  pocketbase_hooks:
+  pocketbase_public:
     driver: local
 
 networks:
