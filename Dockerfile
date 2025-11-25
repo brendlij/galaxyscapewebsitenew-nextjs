@@ -5,11 +5,13 @@ WORKDIR /app
 # Install bun
 RUN npm install -g bun
 
-# Copy package files
-COPY package.json bun.lockb ./
+# Copy package files (support both bun and pnpm lock files)
+COPY package.json ./
+COPY bun.lockb* ./
+COPY pnpm-lock.yaml* ./
 
-# Install dependencies
-RUN bun install --frozen-lockfile
+# Install dependencies with bun
+RUN bun install --frozen-lockfile || bun install
 
 # Copy source code
 COPY . .
@@ -26,10 +28,12 @@ WORKDIR /app
 RUN npm install -g bun
 
 # Copy package files
-COPY package.json bun.lockb ./
+COPY package.json ./
+COPY bun.lockb* ./
+COPY pnpm-lock.yaml* ./
 
 # Install production dependencies only
-RUN bun install --prod --frozen-lockfile
+RUN bun install --prod --frozen-lockfile || bun install --prod
 
 # Copy built app from builder
 COPY --from=builder /app/.next ./.next
