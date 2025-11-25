@@ -3,7 +3,7 @@ version: "3.8"
 services:
   # PocketBase - Backend API & Storage
   pocketbase:
-    image: ghcr.io/pocketbase/pocketbase:latest
+    image: pocketbase/pocketbase:latest
     container_name: galaxyscape-pocketbase
     volumes:
       - pocketbase_data:/pb_data
