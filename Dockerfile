@@ -2,31 +2,34 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Install bun
+RUN npm install -g bun
+
 # Copy package files
-COPY package.json pnpm-lock.yaml ./
+COPY package.json bun.lockb ./
 
 # Install dependencies
-RUN npm install -g pnpm && pnpm install --frozen-lockfile
+RUN bun install --frozen-lockfile
 
 # Copy source code
 COPY . .
 
 # Build Next.js
-RUN pnpm run build
+RUN bun run build
 
 # Production stage
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Install pnpm
-RUN npm install -g pnpm
+# Install bun
+RUN npm install -g bun
 
 # Copy package files
-COPY package.json pnpm-lock.yaml ./
+COPY package.json bun.lockb ./
 
 # Install production dependencies only
-RUN pnpm install --prod --frozen-lockfile
+RUN bun install --prod --frozen-lockfile
 
 # Copy built app from builder
 COPY --from=builder /app/.next ./.next
@@ -34,4 +37,4 @@ COPY --from=builder /app/public ./public
 
 EXPOSE 3000
 
-CMD ["pnpm", "start"]
+CMD ["bun", "start"]
